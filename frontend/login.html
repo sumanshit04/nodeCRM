@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in · Pulse CRM</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/app.css" />
+  </head>
+  <body class="login-page">
+    <div class="login-card">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="brand-mark">PC</div>
+        <div>
+          <h1 class="h4 mb-0">Pulse CRM</h1>
+          <small class="text-muted">Sign in to continue</small>
+        </div>
+      </div>
+      <div id="loginAlert" class="alert alert-danger d-none" role="alert"></div>
+      <form id="loginForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="email">Email / Username</label>
+          <input class="form-control" id="email" name="email" type="email" autocomplete="username" required />
+          <div class="invalid-feedback">Please enter a valid email address.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-control" id="password" name="password" type="password" autocomplete="current-password" required />
+          <div class="invalid-feedback">Password is required.</div>
+        </div>
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe" />
+          <label class="form-check-label" for="rememberMe">Remember Me</label>
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Login</button>
+      </form>
+    </div>
+    <script src="/js/validators.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/login.js"></script>
+  </body>
+</html>

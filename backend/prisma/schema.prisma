@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  active
+  inactive
+}
+
+enum PermissionEffect {
+  grant
+  deny
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  slug        String           @unique
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id              Int              @id @default(autoincrement())
+  key             String           @unique
+  name            String
+  groupName       String           @map("group_name")
+  description     String?
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       Int        @map("role_id")
+  permissionId Int        @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id            Int              @id @default(autoincrement())
+  fullName      String           @map("full_name")
+  email         String           @unique
+  phone         String
+  passwordHash  String           @map("password_hash")
+  roleId        Int              @map("role_id")
+  status        UserStatus       @default(active)
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  role          Role             @relation(fields: [roleId], references: [id])
+  permissions   UserPermission[]
+  assignedLeads Lead[]           @relation("AssignedLeads")
+  createdLeads  Lead[]           @relation("CreatedLeads")
+  activityLogs  ActivityLog[]
+
+  @@map("users")
+}
+
+model UserPermission {
+  userId       Int               @map("user_id")
+  permissionId Int               @map("permission_id")
+  effect       PermissionEffect  @default(grant)
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission        @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permissionId])
+  @@map("user_permissions")
+}
+
+model LeadStatus {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  slug      String  @unique
+  color     String?
+  sortOrder Int     @default(0) @map("sort_order")
+  isActive  Boolean @default(true) @map("is_active")
+  leads     Lead[]
+
+  @@map("lead_statuses")
+}
+
+model Lead {
+  id             Int        @id @default(autoincrement())
+  name           String
+  email          String
+  phone          String
+  country        String
+  address        String?
+  pinCode        String     @map("pin_code")
+  company        String?
+  source         String?
+  notes          String?
+  statusId       Int        @map("status_id")
+  assignedUserId Int?       @map("assigned_user_id")
+  createdById    Int        @map("created_by_id")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  status         LeadStatus @relation(fields: [statusId], references: [id])
+  assignedUser   User?      @relation("AssignedLeads", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  createdBy      User       @relation("CreatedLeads", fields: [createdById], references: [id])
+
+  @@index([email])
+  @@index([statusId])
+  @@index([assignedUserId])
+  @@index([createdAt])
+  @@map("leads")
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int?     @map("user_id")
+  action      String
+  description String
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("activity_logs")
+}
+
+model Session {
+  sid    String   @id @db.VarChar(255)
+  sess   Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire])
+  @@map("session")
+}
